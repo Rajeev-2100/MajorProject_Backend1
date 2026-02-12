@@ -65,12 +65,12 @@ async function getProductDetailByProductId(productId) {
 app.get("/api/products/category/:CategoryId", async (req, res) => {
   try {
     const product = await getAllProductDataByCategory(req.params.CategoryId);
-    // console.log(product);
+    console.log(product);
     if (product) {
       return res.status(200).json({ data: product });
+    }else{
+      res.status(404).json({ error: "This product Id not found" });
     }
-    res.status(404).json({ error: "This product Id not found" });
-    console.error(error.message);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch product Data" });
   }
@@ -81,8 +81,9 @@ app.get("/api/products/:productId", async (req, res) => {
     const product = await getProductDetailByProductId(req.params.productId);
     if (product) {
       return res.status(201).json({ data: product });
+    }else{
+      res.status(404).json({ error: "This product Id not found" });
     }
-    res.status(404).json({ error: "This product Id not found" });
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch product Data" });
   }
@@ -116,7 +117,9 @@ app.post("/category", async (req, res) => {
         .status(201)
         .json({ message: "Saved all Category inside the Product Schema" });
     }
-    res.status(404).json({ error: "Category not created" });
+    else{
+      res.status(404).json({ error: "Category not created" });
+    }
   } catch (error) {
     res
       .status(500)
