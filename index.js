@@ -1,10 +1,11 @@
-const Products = require("./model/product.model.jsx");
+const Products = require("./model/product.model.js");
 const { initializeDatabase } = require("./db/db.connect.js");
 const express = require("express");
-const fs = require("fs");
-const Category = require("./model/category.model.jsx");
-const Users = require("./model/user.model.jsx");
-const Address = require("./model/address.model.jsx");
+const Category = require("./model/category.model.js");
+const Users = require("./model/user.model.js");
+const Address = require("./model/address.model.js");
+const Cart = require("./model/cart.model.js");
+const Wishlist = require('./model/wishlist.model.js')
 
 const app = express();
 initializeDatabase();
@@ -68,7 +69,7 @@ app.get("/api/products/category/:CategoryId", async (req, res) => {
     console.log(product);
     if (product) {
       return res.status(200).json({ data: product });
-    }else{
+    } else {
       res.status(404).json({ error: "This product Id not found" });
     }
   } catch (error) {
@@ -81,7 +82,7 @@ app.get("/api/products/:productId", async (req, res) => {
     const product = await getProductDetailByProductId(req.params.productId);
     if (product) {
       return res.status(201).json({ data: product });
-    }else{
+    } else {
       res.status(404).json({ error: "This product Id not found" });
     }
   } catch (error) {
@@ -116,8 +117,7 @@ app.post("/category", async (req, res) => {
       res
         .status(201)
         .json({ message: "Saved all Category inside the Product Schema" });
-    }
-    else{
+    } else {
       res.status(404).json({ error: "Category not created" });
     }
   } catch (error) {
@@ -173,6 +173,212 @@ app.get("/api/categories/:categoryId", async (req, res) => {
   }
 });
 
+// * ----------------------- Add Cart Page --------------------------
+
+// ! api for create a cart Details
+
+async function createCartDetail(productId, productQuantity) {
+  try {
+    const product = await Products.findById(productId);
+    if (!product) {
+      return null;
+    }
+    
+    const cartItem = new Cart({
+      product: product._id,
+      productQuantity: productQuantity,
+    });
+
+    console.log("CartItem:", cartItem);
+    await cartItem.save();
+    return cartItem;
+  } catch (error) {
+    throw error;
+  }
+}
+
+app.post("/api/cart/:productId", async (req, res) => {
+  try {
+    const { productQuantity } = req.body
+    const cart = await createCartDetail(req.params.productId, productQuantity);
+    if (!cart) {
+      return res.status(404).json({ error: "Product Id not found" });
+    }
+    console.log('Cart: ', cart)
+    res.status(201).json({
+      message: "Product added to cart",
+      data: cart,
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: "Failed to add product to cart",
+      details: error.message,
+    });
+    console.error(error.message)
+  }
+});
+
+// ! api for get a Cart Detail
+
+async function getCartDetail() {
+  try {
+    const product = await Cart.find().populate('product')
+    return product
+  } catch (error) {
+    throw error;
+  }
+}
+
+app.get("/api/cart", async (req, res) => {
+  try {
+    const cart = await getCartDetail();
+    if (!cart) {
+      return res.status(404).json({ error: "Cart Detail not found" });
+    }
+    else{
+      res.status(201).json({
+        message: "Cart Details is this",
+        data: cart,
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      error: "Failed to Fetch Cart data",
+      details: error.message,
+    });
+  }
+});
+
+// ! api for deleted a cart detail
+
+async function deletedCartDetailByCartId(cartId){
+  try {
+    const cart = await Cart.findByIdAndDelete(cartId)
+    return cart
+  } catch (error) {
+    throw error
+  }
+}
+
+app.delete('/api/deletedCart/:cartId', async (req,res) => {
+  try {
+    const cart = await deletedCartDetailByCartId(req.params.cartId)
+    if(!cart){
+      res.status(404).json({error: 'This Cart Id not found'})
+    }else{
+      res.status(201).json({message: 'This cart Id is deleted successfully'})
+    }
+  } catch (error) {
+    res.status(500).json({error: 'Failed to fetch Cart Details'})
+  }
+})
+
+// ! api for update the cart detail
+
+async function updateToCartDetailByProductId(productId, dataToUpdate){
+  try {
+    const cart = await Cart.findByIdAndUpdate(productId, dataToUpdate, {new: true})
+    return cart
+  } catch (error) {
+    throw error
+  }
+}
+
+app.put('/api/updatedCart/:productId', async (req,res) => {
+  try {
+    const cart = await updateToCartDetailByProductId(req.params.productId, req.body)
+    if(cart){
+      res.status(201).json({message: 'Cart Item update Successfully', data: cart})
+    }else{
+      res.status(404).json({error: 'Cart Id not found'})
+    }
+  } catch (error) {
+    res.status(500).json({error: 'Failed to fetch Cart Data'})
+  }
+})
+
+// * ----------------------- WishList Page --------------------------
+ 
+async function createWishListDetail(productId) {
+  try {
+    const wishlist = new Wishlist({
+      product: productId
+    })
+
+    const savedWishlist = await wishlist.save()
+    return savedWishlist
+  } catch (error) {
+    throw error
+  }
+}
+
+app.post("/api/wishlist/:productId", async (req, res) => {
+  try {
+    const wishlist = await createWishListDetail(req.params.productId);
+    if(!wishlist){
+      res.status(404).json({error: 'This Product Id not found in product'})
+    }
+    else{
+      res.status(201).json({
+        message: "Wishlist added successfully", data: wishlist});
+    }
+  } catch (error) {
+    res.status(500).json({
+      error: "Failed to add Wishlist"
+    });
+    console.error(error.message)
+  }
+});
+
+// ! api for get a Wishlist Detail
+
+async function getWishListData(){
+  try {
+    const wishlist = await Wishlist.find().populate()
+    return wishlist
+  } catch (error) {
+    throw error
+  }
+}
+
+app.get('/api/wishlist', async (req, res) => {
+  try {
+    const wishlist = await getWishListData()
+    if(!wishlist){
+      res.status(404).json({error: 'This Wishlist Id not found'})
+    }else{
+      res.status(201).json({message: 'WishList Data is this: ', data: wishlist})
+    }
+  } catch (error) {
+    res.status(500).json({error: 'Failed to fetch Wishlist Data'})
+  }
+})
+
+// ! api for Delete a Wishlist Detail
+
+async function deletedWishlistDetails(productId){
+  try {
+    const wishlist = await Wishlist.findById(productId)
+    return wishlist
+  } catch (error) {
+    throw error
+  }
+}
+
+app.delete('/api/wishlist/:productId', async (req, res) => {
+  try {
+    const wishlist = await deletedWishlistDetails(req.params.productId)
+    if(!wishlist){
+      res.status(404).json({error: 'This Wishlist Id not found'})
+      console.error(error.message)
+    }else{
+      res.status(201).json({message: 'WishList Data is this: ', data: wishlist})
+    }
+  } catch (error) {
+    res.status(500).json({error: 'Failed to fetch Wishlist Data'})
+  }
+})
+
 // * ----------------------- User Profile --------------------------
 
 // ! api for added user Profile
@@ -212,7 +418,7 @@ async function getUserDetail() {
 
 app.get("/api/user", async (req, res) => {
   try {
-    const user = await getUserDetail();
+    const user = await getUserDetail();  
     if (user) {
       res.status(201).json({ message: "User Detail this:", data: user });
     }
@@ -262,7 +468,7 @@ async function getAllDetailOfUserAddress() {
 
 app.get("/api/address", async (req, res) => {
   try {
-    const address = await getAllDetailOfUserAddress()
+    const address = await getAllDetailOfUserAddress();
     if (!address) {
       return res.status(404).json({ error: "Not found" });
     }
@@ -274,51 +480,56 @@ app.get("/api/address", async (req, res) => {
 
 // ! update the User Address Detail
 
-async function updatedToUserAddressDetail(addressId, dataToUpdate){
+async function updatedToUserAddressDetail(addressId, dataToUpdate) {
   try {
-    const address = await Address.findByIdAndUpdate(addressId, dataToUpdate, {new: true})
-    return address
+    const address = await Address.findByIdAndUpdate(addressId, dataToUpdate, {
+      new: true,
+    });
+    return address;
   } catch (error) {
-    throw error
+    throw error;
   }
 }
 
-app.put('/api/address/:addressId', async (req,res) => {
+app.put("/api/address/:addressId", async (req, res) => {
   try {
-    const address = await updatedToUserAddressDetail(req.params.addressId, req.body)
-    if(address){
-      res.status(201).json({data: address})
+    const address = await updatedToUserAddressDetail(
+      req.params.addressId,
+      req.body,
+    );
+    if (address) {
+      res.status(201).json({ data: address });
     }
-    res.status(404).json({error: 'That Address Id not found'})
-    console.error(error.message)
+    res.status(404).json({ error: "That Address Id not found" });
+    console.error(error.message);
   } catch (error) {
-    res.status(500).json({error: 'Failed to Fetch address data'})    
+    res.status(500).json({ error: "Failed to Fetch address data" });
   }
-})
+});
 
 // ! delete route using address id
 
-async function deletedUserDetailAddress(addressId){
+async function deletedUserDetailAddress(addressId) {
   try {
-    const address = await Address.findByIdAndDelete(addressId)
-    return address
+    const address = await Address.findByIdAndDelete(addressId);
+    return address;
   } catch (error) {
-    throw error
+    throw error;
   }
 }
 
-app.delete('/api/address/:addressId', async (req,res) => {
+app.delete("/api/address/:addressId", async (req, res) => {
   try {
-    const address = await deletedUserDetailAddress(req.params.addressId)
-    console.log(req.params.addressId)
-    if(address){
-      res.status(201).json({data: 'User Address Deleted successfully'})
+    const address = await deletedUserDetailAddress(req.params.addressId);
+    console.log(req.params.addressId);
+    if (address) {
+      res.status(201).json({ data: "User Address Deleted successfully" });
     }
-    res.status(404).json({error: 'User Address id not found'})
+    res.status(404).json({ error: "User Address id not found" });
   } catch (error) {
-    res.status(500).json({error: 'Failed to fetch User Address Details'})
+    res.status(500).json({ error: "Failed to fetch User Address Details" });
   }
-})
+});
 
 const PORT = 3001;
 app.listen(PORT, () => {
