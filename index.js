@@ -69,7 +69,11 @@ app.get("/api/products/category/:CategoryId", async (req, res) => {
     console.log(product);
     if (product) {
       return res.status(200).json({ data: product });
+<<<<<<< HEAD
     } else {
+=======
+    }else{
+>>>>>>> 7e5de8f77d04eb3777937ec15614b858158c3bcf
       res.status(404).json({ error: "This product Id not found" });
     }
   } catch (error) {
@@ -82,7 +86,11 @@ app.get("/api/products/:productId", async (req, res) => {
     const product = await getProductDetailByProductId(req.params.productId);
     if (product) {
       return res.status(201).json({ data: product });
+<<<<<<< HEAD
     } else {
+=======
+    }else{
+>>>>>>> 7e5de8f77d04eb3777937ec15614b858158c3bcf
       res.status(404).json({ error: "This product Id not found" });
     }
   } catch (error) {
@@ -120,6 +128,12 @@ app.post("/category", async (req, res) => {
     } else {
       res.status(404).json({ error: "Category not created" });
     }
+<<<<<<< HEAD
+=======
+    else{
+      res.status(404).json({ error: "Category not created" });
+    }
+>>>>>>> 7e5de8f77d04eb3777937ec15614b858158c3bcf
   } catch (error) {
     res
       .status(500)
