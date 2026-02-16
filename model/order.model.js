@@ -1,75 +1,37 @@
 const mongoose = require("mongoose");
 
-const OrderSchema = mongoose.Schema({
-  product: {
-    productName: {
-      type: String,
+const orderSchema = new mongoose.Schema(
+  {
+    product: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Product",
       required: true,
     },
-    productPrice: {
-      type: Number,
-      min: 10,
-      max: 200,
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
       required: true,
     },
-    productImage: {
-      type: String,
+    address: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Address",
       required: true,
     },
-    discountPrice: {
-      type: Number,
-      required: true,
-    },
-    deliveryCharges: {
-      type: Number,
-      required: true,
-    },
-    rating: {
-      type: Number,
-      enum: [4.2, 4.4, 4.6, 4.8],
-      required: true,
-    },
-    productQuantity: {
+    quantity: {
       type: Number,
       default: 1,
     },
-    size: {
+    totalPrice: {
+      type: Number,
+      required: true,
+    },
+    orderStatus: {
       type: String,
-      enum: ["S", "M", "L", "XL", "XXL"],
-      required: true,
-    },
-    productDescription: {
-      type: [String],
-      required: true,
-    },
-    categoryField: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Category",
-      required: true,
+      default: "Placed",
     },
   },
-  userDetail: {
-    name: {
-      type: String,
-      required: true,
-    },
-    email: {
-      type: String,
-      required: true,
-    },
-    number: {
-      type: String,
-      required: true,
-    },
-  },
-  addressDetail: {
-    address: {
-      type: String,
-      required: true,
-    },
-    location: {
-      type: String,
-      required: true,
-    },
-  },
-});
+  { timestamps: true }
+);
+
+const Order = mongoose.model("Order", orderSchema);
+module.exports = Order;
