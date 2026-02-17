@@ -5,8 +5,8 @@ const Category = require("./model/category.model.js");
 const Users = require("./model/user.model.js");
 const Address = require("./model/address.model.js");
 const Cart = require("./model/cart.model.js");
-const Wishlist = require('./model/wishlist.model.js')
-const Order = require('./model/order.model.js')
+const Wishlist = require("./model/wishlist.model.js");
+const Order = require("./model/order.model.js");
 
 const app = express();
 initializeDatabase();
@@ -184,7 +184,7 @@ async function createCartDetail(productId, productQuantity) {
     if (!product) {
       return null;
     }
-    
+
     const cartItem = new Cart({
       product: product._id,
       productQuantity: productQuantity,
@@ -200,12 +200,12 @@ async function createCartDetail(productId, productQuantity) {
 
 app.post("/api/cart/:productId", async (req, res) => {
   try {
-    const { productQuantity } = req.body
+    const { productQuantity } = req.body;
     const cart = await createCartDetail(req.params.productId, productQuantity);
     if (!cart) {
       return res.status(404).json({ error: "Product Id not found" });
     }
-    console.log('Cart: ', cart)
+    console.log("Cart: ", cart);
     res.status(201).json({
       message: "Product added to cart",
       data: cart,
@@ -215,7 +215,7 @@ app.post("/api/cart/:productId", async (req, res) => {
       error: "Failed to add product to cart",
       details: error.message,
     });
-    console.error(error.message)
+    console.error(error.message);
   }
 });
 
@@ -223,8 +223,8 @@ app.post("/api/cart/:productId", async (req, res) => {
 
 async function getCartDetail() {
   try {
-    const product = await Cart.find().populate('product')
-    return product
+    const product = await Cart.find().populate("product");
+    return product;
   } catch (error) {
     throw error;
   }
@@ -235,8 +235,7 @@ app.get("/api/cart", async (req, res) => {
     const cart = await getCartDetail();
     if (!cart) {
       return res.status(404).json({ error: "Cart Detail not found" });
-    }
-    else{
+    } else {
       res.status(201).json({
         message: "Cart Details is this",
         data: cart,
@@ -252,133 +251,145 @@ app.get("/api/cart", async (req, res) => {
 
 // ! api for deleted a cart detail
 
-async function deletedCartDetailByCartId(cartId){
+async function deletedCartDetailByCartId(cartId) {
   try {
-    const cart = await Cart.findByIdAndDelete(cartId)
-    return cart
+    const cart = await Cart.findByIdAndDelete(cartId);
+    return cart;
   } catch (error) {
-    throw error
+    throw error;
   }
 }
 
-app.delete('/api/deletedCart/:cartId', async (req,res) => {
+app.delete("/api/deletedCart/:cartId", async (req, res) => {
   try {
-    const cart = await deletedCartDetailByCartId(req.params.cartId)
-    if(!cart){
-      res.status(404).json({error: 'This Cart Id not found'})
-    }else{
-      res.status(201).json({message: 'This cart Id is deleted successfully'})
+    const cart = await deletedCartDetailByCartId(req.params.cartId);
+    if (!cart) {
+      res.status(404).json({ error: "This Cart Id not found" });
+    } else {
+      res.status(201).json({ message: "This cart Id is deleted successfully" });
     }
   } catch (error) {
-    res.status(500).json({error: 'Failed to fetch Cart Details'})
+    res.status(500).json({ error: "Failed to fetch Cart Details" });
   }
-})
+});
 
 // ! api for update the cart detail
 
-async function updateToCartDetailByProductId(productId, dataToUpdate){
+async function updateToCartDetailByProductId(productId, dataToUpdate) {
   try {
-    const cart = await Cart.findByIdAndUpdate(productId, dataToUpdate, {new: true})
-    return cart
+    const cart = await Cart.findByIdAndUpdate(productId, dataToUpdate, {
+      new: true,
+    });
+    return cart;
   } catch (error) {
-    throw error
+    throw error;
   }
 }
 
-app.put('/api/updatedCart/:productId', async (req,res) => {
+app.put("/api/updatedCart/:productId", async (req, res) => {
   try {
-    const cart = await updateToCartDetailByProductId(req.params.productId, req.body)
-    if(cart){
-      res.status(201).json({message: 'Cart Item update Successfully', data: cart})
-    }else{
-      res.status(404).json({error: 'Cart Id not found'})
+    const cart = await updateToCartDetailByProductId(
+      req.params.productId,
+      req.body,
+    );
+    if (cart) {
+      res
+        .status(201)
+        .json({ message: "Cart Item update Successfully", data: cart });
+    } else {
+      res.status(404).json({ error: "Cart Id not found" });
     }
   } catch (error) {
-    res.status(500).json({error: 'Failed to fetch Cart Data'})
+    res.status(500).json({ error: "Failed to fetch Cart Data" });
   }
-})
+});
 
 // * ----------------------- WishList Page --------------------------
- 
+
 async function createWishListDetail(productId) {
   try {
     const wishlist = new Wishlist({
-      product: productId
-    })
+      product: productId,
+    });
 
-    const savedWishlist = await wishlist.save()
-    return savedWishlist
+    const savedWishlist = await wishlist.save();
+    return savedWishlist;
   } catch (error) {
-    throw error
+    throw error;
   }
 }
 
 app.post("/api/wishlist/:productId", async (req, res) => {
   try {
     const wishlist = await createWishListDetail(req.params.productId);
-    if(!wishlist){
-      res.status(404).json({error: 'This Product Id not found in product'})
-    }
-    else{
+    if (!wishlist) {
+      res.status(404).json({ error: "This Product Id not found in product" });
+    } else {
       res.status(201).json({
-        message: "Wishlist added successfully", data: wishlist});
+        message: "Wishlist added successfully",
+        data: wishlist,
+      });
     }
   } catch (error) {
     res.status(500).json({
-      error: "Failed to add Wishlist"
+      error: "Failed to add Wishlist",
     });
-    console.error(error.message)
+    console.error(error.message);
   }
 });
 
 // ! api for get a Wishlist Detail
 
-async function getWishListData(){
+async function getWishListData() {
   try {
-    const wishlist = await Wishlist.find().populate('product')
-    return wishlist
+    const wishlist = await Wishlist.find().populate("product");
+    return wishlist;
   } catch (error) {
-    throw error
+    throw error;
   }
 }
 
-app.get('/api/wishlist', async (req, res) => {
+app.get("/api/wishlist", async (req, res) => {
   try {
-    const wishlist = await getWishListData()
-    if(!wishlist){
-      res.status(404).json({error: 'This Wishlist Id not found'})
-    }else{
-      res.status(201).json({message: 'WishList Data is this: ', data: wishlist})
+    const wishlist = await getWishListData();
+    if (!wishlist) {
+      res.status(404).json({ error: "This Wishlist Id not found" });
+    } else {
+      res
+        .status(201)
+        .json({ message: "WishList Data is this: ", data: wishlist });
     }
   } catch (error) {
-    res.status(500).json({error: 'Failed to fetch Wishlist Data'})
+    res.status(500).json({ error: "Failed to fetch Wishlist Data" });
   }
-})
+});
 
 // ! api for Delete a Wishlist Detail
 
-async function deletedWishlistDetails(productId){
+async function deletedWishlistDetails(productId) {
   try {
-    const wishlist = await Wishlist.findById(productId)
-    return wishlist
+    const wishlist = await Wishlist.findById(productId);
+    return wishlist;
   } catch (error) {
-    throw error
+    throw error;
   }
 }
 
-app.delete('/api/wishlist/:productId', async (req, res) => {
+app.delete("/api/wishlist/:productId", async (req, res) => {
   try {
-    const wishlist = await deletedWishlistDetails(req.params.productId)
-    if(!wishlist){
-      res.status(404).json({error: 'This Wishlist Id not found'})
-      console.error(error.message)
-    }else{
-      res.status(201).json({message: 'WishList Data is this: ', data: wishlist})
+    const wishlist = await deletedWishlistDetails(req.params.productId);
+    if (!wishlist) {
+      res.status(404).json({ error: "This Wishlist Id not found" });
+      console.error(error.message);
+    } else {
+      res
+        .status(201)
+        .json({ message: "WishList Data is this: ", data: wishlist });
     }
   } catch (error) {
-    res.status(500).json({error: 'Failed to fetch Wishlist Data'})
+    res.status(500).json({ error: "Failed to fetch Wishlist Data" });
   }
-})
+});
 
 // * ----------------------- User Profile --------------------------
 
@@ -419,7 +430,7 @@ async function getUserDetail() {
 
 app.get("/api/user", async (req, res) => {
   try {
-    const user = await getUserDetail();  
+    const user = await getUserDetail();
     if (user) {
       res.status(201).json({ message: "User Detail this:", data: user });
     }
@@ -532,13 +543,73 @@ app.delete("/api/address/:addressId", async (req, res) => {
   }
 });
 
-async function createOrderDetails(newOrder){
+async function createOrderDetails(newOrder) {
   try {
-    const order = new 
+    const order = new Order(newOrder);
+    const savedOrder = await order.save();
+    return savedOrder;
   } catch (error) {
-    
+    throw error;
   }
 }
+
+app.post("/api/order", async (req, res) => {
+  try {
+    const { product, user, address, quantity } = req.body;
+    if (!product || !user || !address || !quantity) {
+      return res.status(400).json({
+        message: "All fields are required",
+      });
+    }
+    const productData = await Products.findById(product);
+    if (!productData) {
+      return res.status(404).json({
+        message: "Product not found",
+      });
+    }
+    const totalPrice = productData.productPrice * quantity;
+    const order = new Order({
+      product,
+      user,
+      address,
+      quantity,
+      totalPrice,
+    });
+    const savedOrder = await order.save();
+    res.status(201).json({
+      message: "Order placed successfully",
+      order: savedOrder,
+    });
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({
+      message: "Failed to create order",
+      error: error.message,
+    });
+  }
+});
+
+async function getOrderDetails(orderId) {
+  try {
+    const order = await Order.findById(orderId);
+    return order;
+  } catch (error) {
+    throw error;
+  }
+}
+
+app.get("/api/order/:orderId", async (req, res) => {
+  try {
+    const order = await getOrderDetails(req.params.orderId);
+    if (!order) {
+      res.status(404).json({ error: "Order Id not found" });
+    } else {
+      res.status(201).json({ message: "Order Details is this: ", data: order });
+    }
+  } catch (error) {
+    res.status(500).json({ error: "Failed to Fetch Order Detail" });
+  }
+});
 
 const PORT = 3001;
 app.listen(PORT, () => {
