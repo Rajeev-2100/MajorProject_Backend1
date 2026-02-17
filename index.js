@@ -611,6 +611,28 @@ app.get("/api/order/:orderId", async (req, res) => {
   }
 });
 
+async function getAllOrderDetail() {
+  try {
+    const order = await Order.find().populate()
+    return order
+  } catch (error) {
+    throw error
+  }
+}
+
+app.get('/api/order', async (req,res) => {
+  try {
+    const order = await getAllOrderDetail()
+    if (!order) {
+      res.status(404).json({ error: "Orders not found" });
+    } else {
+      res.status(201).json({ message: "Order Details is this: ", data: order });
+    }
+  } catch (error) {
+    res.status(500).json({ error: "Failed to Fetch Order Details" });
+  }
+})
+
 const PORT = 3001;
 app.listen(PORT, () => {
   console.log("Server is running on this", PORT);
