@@ -543,6 +543,8 @@ app.delete("/api/address/:addressId", async (req, res) => {
   }
 });
 
+// ! post route for orderDetail
+
 async function createOrderDetails(newOrder) {
   try {
     const order = new Order(newOrder);
@@ -575,10 +577,15 @@ app.post("/api/order", async (req, res) => {
       quantity,
       totalPrice,
     });
+
     const savedOrder = await order.save();
+    const populatedOrder = await Order.findById(savedOrder._id)
+      .populate("product")
+      .populate("user")
+      .populate("address");
     res.status(201).json({
       message: "Order placed successfully",
-      order: savedOrder,
+      order: populatedOrder,
     });
   } catch (error) {
     console.error(error.message);
@@ -589,18 +596,25 @@ app.post("/api/order", async (req, res) => {
   }
 });
 
-async function getOrderDetails(orderId) {
+async function getOrderDetailsById(orderId) {
   try {
-    const order = await Order.findById(orderId);
+    const order = await Order.findById(orderId)
+      .populate("product")
+      .populate("user")
+      .populate("address")
+      .select('product address user totalPrice quantity orderStatus createdAt')
     return order;
   } catch (error) {
     throw error;
   }
 }
 
+// ! get route for orderDetail by orderId
+
+
 app.get("/api/order/:orderId", async (req, res) => {
   try {
-    const order = await getOrderDetails(req.params.orderId);
+    const order = await getOrderDetailsById(req.params.orderId);
     if (!order) {
       res.status(404).json({ error: "Order Id not found" });
     } else {
@@ -611,18 +625,23 @@ app.get("/api/order/:orderId", async (req, res) => {
   }
 });
 
+// ! get route for all orderDetail 
+
+
 async function getAllOrderDetail() {
   try {
-    const order = await Order.find().populate('product').populate('user').populate('address')
-    return order
+    const order = await Order.find()
+      .populate("product")
+      .select('product totalPrice quantity orderStatus createdAt')
+    return order;
   } catch (error) {
-    throw error
+    throw error;
   }
 }
 
-app.get('/api/order', async (req,res) => {
+app.get("/api/order", async (req, res) => {
   try {
-    const order = await getAllOrderDetail()
+    const order = await getAllOrderDetail();
     if (!order) {
       res.status(404).json({ error: "Orders not found" });
     } else {
@@ -630,9 +649,9 @@ app.get('/api/order', async (req,res) => {
     }
   } catch (error) {
     res.status(500).json({ error: "Failed to Fetch Order Details" });
-    console.error(error.message)
+    console.error(error.message);
   }
-})
+});
 
 const PORT = 3001;
 app.listen(PORT, () => {
