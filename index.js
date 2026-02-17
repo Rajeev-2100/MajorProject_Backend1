@@ -613,7 +613,7 @@ app.get("/api/order/:orderId", async (req, res) => {
 
 async function getAllOrderDetail() {
   try {
-    const order = await Order.find().populate()
+    const order = await Order.find().populate('product').populate('user').populate('address')
     return order
   } catch (error) {
     throw error
@@ -630,6 +630,7 @@ app.get('/api/order', async (req,res) => {
     }
   } catch (error) {
     res.status(500).json({ error: "Failed to Fetch Order Details" });
+    console.error(error.message)
   }
 })
 
