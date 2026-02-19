@@ -84,12 +84,37 @@ app.get("/api/products/:productId", async (req, res) => {
     if (product) {
       return res.status(201).json({ data: product });
     } else {
-      res.status(404).json({ error: "This product Id not found" });
+      res.status(404).json({ error: "This product Id not found" });s
     }
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch product Data" });
   }
 });
+
+// ! get the Product Detail By Product Name
+
+async function getProductDetailsByProductName(name){
+  try {
+    const product = await Products.findOne({productName: name})
+    return product
+  } catch (error) {
+    throw error
+  }
+}
+
+app.get('/api/productDetails/:productName', async (req,res) => {
+  try {
+    const product = await getProductDetailsByProductName(req.params.productName)
+    if(product){
+      res.status(201).json({data: product})
+    }else{
+      res.status(404).json({error: 'This product Name not found in DB'})
+      console.error(error.message)
+    }
+  } catch (error) {
+    res.status(500).json({error: 'Failed to fetch product Detail'})
+  }
+})
 
 async function getAllProductDataByCategory(categoryId) {
   try {
