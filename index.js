@@ -130,11 +130,9 @@ app.post("/category", async (req, res) => {
   }
 });
 
-async function getAllProductDataByCategory(categoryId) {
+async function getAllProductDataByCategoryId(categoryId) {
   try {
-    // console.log(categoryId)
     const products = await Products.find({ categoryField: categoryId });
-    // console.log(products)
     return products;
   } catch (error) {
     throw error;
@@ -143,7 +141,7 @@ async function getAllProductDataByCategory(categoryId) {
 
 app.get("/api/products/category/:CategoryId", async (req, res) => {
   try {
-    const product = await getAllProductDataByCategory(req.params.CategoryId);
+    const product = await getAllProductDataByCategoryId(req.params.CategoryId);
     console.log(product);
     if (product) {
       return res.status(200).json({ data: product });
@@ -169,8 +167,9 @@ app.get("/api/categories", async (req, res) => {
     const category = await getAllCategoryData();
     if (category) {
       res.status(201).json({ data: category });
+    }else{
+      res.status(404).json({ error: "Categories not found" });
     }
-    res.status(404).json({ error: "Categories not found" });
   } catch (error) {
     res
       .status(500)
@@ -192,14 +191,43 @@ app.get("/api/categories/:categoryId", async (req, res) => {
     const category = await getCategoryByCategoryId(req.params.categoryId);
     if (category) {
       res.status(200).json({ data: category });
+    }else{
+      res.status(404).json({ error: "Category Id not found" });
     }
-    res.status(404).json({ error: "Category Id not found" });
   } catch (error) {
     res
       .status(500)
       .json({ error: "Failed to fetch Category Data", details: error.message });
   }
 });
+
+async function getAllProductDataByCategoryName(categoryName){
+  try {
+    const category = await Category.findOne({categoryField: categoryName})
+    if(!category){
+      return null
+    }
+    const products = await Products.find({categoryField: category._id}).populate('categoryField')
+    return products
+  } catch (error) {
+    throw error
+  }
+}
+
+app.get('/api/category/:categoryName', async (req, res) => {
+  try {
+    const category = await getAllProductDataByCategoryName(req.params.categoryName)
+    if(category){
+      res.json({data: category})
+    }else{
+      res.status(404).json({error: 'Category Data not found'})
+    }
+  } catch (error) {
+    res.status(500).json({error: 'Failed to fetch Category Data'})
+    console.error(error)
+  }
+})
+
 
 // * ----------------------- Add Cart Page --------------------------
 
