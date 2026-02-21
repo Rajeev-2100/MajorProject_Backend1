@@ -64,20 +64,6 @@ async function getProductDetailByProductId(productId) {
   }
 }
 
-app.get("/api/products/category/:CategoryId", async (req, res) => {
-  try {
-    const product = await getAllProductDataByCategory(req.params.CategoryId);
-    console.log(product);
-    if (product) {
-      return res.status(200).json({ data: product });
-    } else {
-      res.status(404).json({ error: "This product Id not found" });
-    }
-  } catch (error) {
-    res.status(500).json({ error: "Failed to fetch product Data" });
-  }
-});
-
 app.get("/api/products/:productId", async (req, res) => {
   try {
     const product = await getProductDetailByProductId(req.params.productId);
@@ -85,7 +71,6 @@ app.get("/api/products/:productId", async (req, res) => {
       return res.status(201).json({ data: product });
     } else {
       res.status(404).json({ error: "This product Id not found" });
-      s;
     }
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch product Data" });
@@ -119,17 +104,6 @@ app.get("/api/productDetails/:productName", async (req, res) => {
   }
 });
 
-async function getAllProductDataByCategory(categoryId) {
-  try {
-    // console.log(categoryId)
-    const products = await Products.find({ categoryField: categoryId });
-    // console.log(products)
-    return products;
-  } catch (error) {
-    throw error;
-  }
-}
-
 async function createCategoryData(newCategory) {
   try {
     const category = new Category(newCategory);
@@ -144,15 +118,40 @@ app.post("/category", async (req, res) => {
     const category = await createCategoryData(req.body);
     if (category) {
       res
-        .status(201)
-        .json({ message: "Saved all Category inside the Product Schema" });
+      .status(201)
+      .json({ message: "Saved all Category inside the Product Schema" });
     } else {
       res.status(404).json({ error: "Category not created" });
     }
   } catch (error) {
     res
-      .status(500)
-      .json({ error: "Failed to fetch Category Data", details: error.message });
+    .status(500)
+    .json({ error: "Failed to fetch Category Data", details: error.message });
+  }
+});
+
+async function getAllProductDataByCategory(categoryId) {
+  try {
+    // console.log(categoryId)
+    const products = await Products.find({ categoryField: categoryId });
+    // console.log(products)
+    return products;
+  } catch (error) {
+    throw error;
+  }
+}
+
+app.get("/api/products/category/:CategoryId", async (req, res) => {
+  try {
+    const product = await getAllProductDataByCategory(req.params.CategoryId);
+    console.log(product);
+    if (product) {
+      return res.status(200).json({ data: product });
+    } else {
+      res.status(404).json({ error: "This product Id not found" });
+    }
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch product Data" });
   }
 });
 
@@ -394,25 +393,26 @@ app.get("/api/wishlist", async (req, res) => {
 
 // ! api for Delete a Wishlist Detail
 
-async function deletedWishlistDetails(productId) {
+async function deletedWishlistDetails(wishlistId) {
   try {
-    const wishlist = await Wishlist.findById(productId);
+    const wishlist = await Wishlist.findByIdAndDelete(wishlistId);
     return wishlist;
   } catch (error) {
     throw error;
   }
 }
 
-app.delete("/api/wishlist/:productId", async (req, res) => {
+app.delete("/api/wishlist/:wishlistId", async (req, res) => {
   try {
-    const wishlist = await deletedWishlistDetails(req.params.productId);
+    const wishlist = await deletedWishlistDetails(req.params.wishlistId);
     if (!wishlist) {
       res.status(404).json({ error: "This Wishlist Id not found" });
       console.error(error.message);
     } else {
       res
-        .status(201)
-        .json({ message: "WishList Data is this: ", data: wishlist });
+      .status(201)
+      .json({ message: "WishList Data is this: ", data: wishlist });
+      console.log('Wishlist: ', wishlist)
     }
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch Wishlist Data" });
