@@ -84,7 +84,8 @@ app.get("/api/products/:productId", async (req, res) => {
     if (product) {
       return res.status(201).json({ data: product });
     } else {
-      res.status(404).json({ error: "This product Id not found" });s
+      res.status(404).json({ error: "This product Id not found" });
+      s;
     }
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch product Data" });
@@ -93,28 +94,30 @@ app.get("/api/products/:productId", async (req, res) => {
 
 // ! get the Product Detail By Product Name
 
-async function getProductDetailsByProductName(name){
+async function getProductDetailsByProductName(name) {
   try {
-    const product = await Products.findOne({productName: name})
-    return product
+    const product = await Products.findOne({ productName: name });
+    return product;
   } catch (error) {
-    throw error
+    throw error;
   }
 }
 
-app.get('/api/productDetails/:productName', async (req,res) => {
+app.get("/api/productDetails/:productName", async (req, res) => {
   try {
-    const product = await getProductDetailsByProductName(req.params.productName)
-    if(product){
-      res.status(201).json({data: product})
-    }else{
-      res.status(404).json({error: 'This product Name not found in DB'})
-      console.error(error.message)
+    const product = await getProductDetailsByProductName(
+      req.params.productName,
+    );
+    if (product) {
+      res.status(201).json({ data: product });
+    } else {
+      res.status(404).json({ error: "This product Name not found in DB" });
+      console.error(error.message);
     }
   } catch (error) {
-    res.status(500).json({error: 'Failed to fetch product Detail'})
+    res.status(500).json({ error: "Failed to fetch product Detail" });
   }
-})
+});
 
 async function getAllProductDataByCategory(categoryId) {
   try {
@@ -627,7 +630,7 @@ async function getOrderDetailsById(orderId) {
       .populate("product")
       .populate("user")
       .populate("address")
-      .select('product address user totalPrice quantity orderStatus createdAt')
+      .select("product address user totalPrice quantity orderStatus createdAt");
     return order;
   } catch (error) {
     throw error;
@@ -635,7 +638,6 @@ async function getOrderDetailsById(orderId) {
 }
 
 // ! get route for orderDetail by orderId
-
 
 app.get("/api/order/:orderId", async (req, res) => {
   try {
@@ -650,14 +652,13 @@ app.get("/api/order/:orderId", async (req, res) => {
   }
 });
 
-// ! get route for all orderDetail 
-
+// ! get route for all orderDetail
 
 async function getAllOrderDetail() {
   try {
     const order = await Order.find()
       .populate("product")
-      .select('product totalPrice quantity orderStatus createdAt')
+      .select("product totalPrice quantity orderStatus createdAt");
     return order;
   } catch (error) {
     throw error;
