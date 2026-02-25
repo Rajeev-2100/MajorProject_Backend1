@@ -7,6 +7,7 @@ const Address = require("./model/address.model.js");
 const Cart = require("./model/cart.model.js");
 const Wishlist = require("./model/wishlist.model.js");
 const Order = require("./model/order.model.js");
+// const ProductsData = require('./products.json')
 
 const app = express();
 initializeDatabase();
@@ -22,17 +23,17 @@ app.use(cors(corsOptions));
 
 app.use(express.json());
 
-// async function seedData() {
-//   try {
-//     for (const ProductData of ProductsData) {
-//       const newProduct = new Products(ProductData);
-//       await newProduct.save();
-//     }
-//     console.log("All products saved successfully");
-//   } catch (error) {
-//     console.log("Error seeding the data:", error.message);
-//   }
-// }
+async function seedData() {
+  try {
+    for (const ProductData of ProductsData) {
+      const newProduct = new Products(ProductData);
+      await newProduct.save();
+    }
+    console.log("All products saved successfully");
+  } catch (error) {
+    console.log("Error seeding the data:", error.message);
+  }
+}
 
 // seedData()
 
