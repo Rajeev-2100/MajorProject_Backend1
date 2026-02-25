@@ -229,6 +229,27 @@ app.get('/api/category/:categoryName', async (req, res) => {
   }
 })
 
+async function deletedCategoryRouteWithSpecificVal (categoryId){
+  try {
+    const product = await Products.findOneAndDelete({categoryField: categoryId})
+    return product
+  } catch (error) {
+    throw error
+  }
+}
+
+app.delete('/api/category/deletedCategoryName/:categoryName', async (req,res) => {
+  try {
+    const product = await deletedCategoryRouteWithSpecificVal(req.params.categoryName)
+    if(product.length !== 0){
+      res.status(201).json({json: 'Deleted All Id which contains this Category Field', data: product})
+    }else{
+      res.status(404).json({error: 'This Category Field not found'})
+    }
+  } catch (error) {
+    res.status(500).json({error: 'Failed to fetch Product Data Field'})
+  }
+})
 
 // * ----------------------- Add Cart Page --------------------------
 
