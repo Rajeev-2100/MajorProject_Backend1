@@ -36,6 +36,7 @@ async function seedData() {
 }
 
 // seedData()
+// * all product route are here below
 
 async function getAllProductData() {
   try {
@@ -255,7 +256,7 @@ app.delete('/api/category/deletedCategoryName/:categoryName', async (req,res) =>
 
 // ! api for create a cart Details
 
-async function createCartDetail(productId, productQuantity) {
+async function createCartDetail(productId, productQuantity, productSize) {
   try {
     const product = await Products.findById(productId);
     if (!product) {
@@ -265,6 +266,7 @@ async function createCartDetail(productId, productQuantity) {
     const cartItem = new Cart({
       product: product._id,
       productQuantity: productQuantity,
+      productSize, productSize,
     });
 
     console.log("CartItem:", cartItem);
@@ -277,8 +279,8 @@ async function createCartDetail(productId, productQuantity) {
 
 app.post("/api/cart/:productId", async (req, res) => {
   try {
-    const { productQuantity } = req.body;
-    const cart = await createCartDetail(req.params.productId, productQuantity);
+    const { productQuantity, productSize } = req.body;
+    const cart = await createCartDetail(req.params.productId, productQuantity, productSize);
     if (!cart) {
       return res.status(404).json({ error: "Product Id not found" });
     }
@@ -352,9 +354,9 @@ app.delete("/api/deletedCart/:cartId", async (req, res) => {
 
 // ! api for update the cart detail
 
-async function updateToCartDetailByProductId(productId, dataToUpdate) {
+async function updateToCartDetailByCartId(cartId, dataToUpdate) {
   try {
-    const cart = await Cart.findByIdAndUpdate(productId, dataToUpdate, {
+    const cart = await Cart.findByIdAndUpdate(cartId, dataToUpdate, {
       new: true,
     });
     return cart;
@@ -363,10 +365,10 @@ async function updateToCartDetailByProductId(productId, dataToUpdate) {
   }
 }
 
-app.put("/api/updatedCart/:productId", async (req, res) => {
+app.put("/api/updatedCart/:cartId", async (req, res) => {
   try {
-    const cart = await updateToCartDetailByProductId(
-      req.params.productId,
+    const cart = await updateToCartDetailByCartId(
+      req.params.cartId,
       req.body,
     );
     if (cart) {
@@ -374,12 +376,34 @@ app.put("/api/updatedCart/:productId", async (req, res) => {
         .status(201)
         .json({ message: "Cart Item update Successfully", data: cart });
     } else {
-      res.status(404).json({ error: "Cart Id not found" });
+      res.status(404).json({ error: "Product Id not found" });
     }
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch Cart Data" });
   }
 });
+
+async function updatedCartSizeByCartId(cartId, dataToUpdate){
+  try {
+    const cart = await Cart.findByIdAndUpdate(cartId, dataToUpdate, { new: true})
+    return cart
+  } catch (error) {
+    throw error
+  }
+}
+
+app.put('/api/updateCartBySize/:cartId', async (req, res) => {
+  try {
+    const cart = await updatedCartSizeByCartId(req.params.cartId, req.body)
+    if(cart){
+      res.status(201).json({message: 'Cart Item updated Successfully', data: cart})
+    }else{
+      res.status(404).json({error: 'This Product Id not found'})
+    }
+  } catch (error) {
+    res.status(500).json({error: 'Failed to Fetch Cart Data'})
+  }
+})
 
 // * ----------------------- WishList Page --------------------------
 
