@@ -407,10 +407,18 @@ app.put('/api/updateCartBySize/:cartId', async (req, res) => {
 
 // * ----------------------- WishList Page --------------------------
 
-async function createWishListDetail(productId) {
+async function createWishListDetail(productId, productQuantity, productSize) {
   try {
+    const product = await Products.findById(productId)
+    if(!product){
+      return null
+    }
+
+
     const wishlist = new Wishlist({
       product: productId,
+      productQuantity: productQuantity, 
+      productSize: productSize
     });
 
     const savedWishlist = await wishlist.save();
@@ -422,7 +430,8 @@ async function createWishListDetail(productId) {
 
 app.post("/api/wishlist/:productId", async (req, res) => {
   try {
-    const wishlist = await createWishListDetail(req.params.productId);
+    const { productQuantity, productSize } = req.body
+    const wishlist = await createWishListDetail(req.params.productId, productQuantity, productSize);
     if (!wishlist) {
       res.status(404).json({ error: "This Product Id not found in product" });
     } else {
