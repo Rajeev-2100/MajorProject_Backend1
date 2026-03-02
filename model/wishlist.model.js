@@ -1,4 +1,4 @@
-const mongoose = require('mongoose')
+const mongoose = require("mongoose");
 
 const wishlistSchema = new mongoose.Schema(
   {
@@ -7,9 +7,18 @@ const wishlistSchema = new mongoose.Schema(
       ref: "Product",
       required: true,
     },
+    productQuantity: {
+      type: Number,
+      default: 1,
+    },
+    productSize: {
+      type: String,
+      enum: ["S", "M", "L", "XL", "XXL"],
+      required: true,
+    },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 const Wishlist = mongoose.model("Wishlist", wishlistSchema);
-module.exports = Wishlist
+module.exports = Wishlist;
