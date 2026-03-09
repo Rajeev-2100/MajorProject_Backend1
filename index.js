@@ -79,6 +79,28 @@ app.get("/api/products/:productId", async (req, res) => {
   }
 });
 
+async function updateProductImageDetailByProductId(productId, dataToUpdate){
+  try {
+    const product = await Products.findByIdAndUpdate(productId, dataToUpdate, {new: true})
+    return product
+  } catch (error) {
+    throw error
+  }
+}
+
+app.post('/api/products/:productId', async (req,res) => {
+  try {
+    const product = await updateProductImageDetailByProductId(req.params.productId, req.body)
+    if(product){
+      res.status(201).json({data: product})
+    }else{
+      res.status(404).json({error: 'Product Id not found'})
+    }
+  } catch (error) {
+    res.status(500).json({error: 'Failed to fetch product Data'})
+  }
+})
+
 // ! get the Product Detail By Product Name
 
 async function getProductDetailsByProductName(name) {
