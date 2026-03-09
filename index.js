@@ -427,6 +427,32 @@ app.put('/api/updateCartBySize/:cartId', async (req, res) => {
   }
 })
 
+// ! api for when go to checkout page then deleted all card detail
+
+async function deletedAllCartWhenGoToCheckOut(){
+  try {
+    const cart = await Cart.deleteMany({})
+    return cart
+  } catch (error) {
+    throw error
+  }
+}
+
+app.delete('/api/cart/deletedAll', async (req,res) => {
+  try {
+    const cart = await deletedAllCartWhenGoToCheckOut()
+    console.log(cart)
+    if(cart.deletedCount > 0){
+      res.status(201).json({message: 'All Cart Data Deleted successfully'})
+    }else{
+      res.status(404).json({error: 'Cart already empty'})
+    }
+  } catch (error) {
+    res.status(500).json({error: 'Failed to Delete Cart Data'})
+  }
+})
+
+
 // * ----------------------- WishList Page --------------------------
 
 async function createWishListDetail(productId, productQuantity, productSize) {
